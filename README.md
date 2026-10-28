@@ -15,19 +15,20 @@ This repository holds no service. It holds what the services agree on:
 
 ## The services
 
-Each one is its own repository and passes the vectors here.
+Each one is its own repository and passes the vectors here. Only `agent-redact` is released so far; the
+others are being built against this contract.
 
-| Service | Job |
-|---|---|
-| `agent-transcripts` | read Claude, Codex, Gemini, Grok and feed-guard files into envelopes |
-| `agent-redact` | remove secrets from text and JSON |
-| `agent-tail` | collector: watch, spool, ship |
-| `agent-store` | ingest and query API over Postgres with pgvector |
-| `agent-embed` | embedding worker |
-| `agent-find` | query CLI |
-| `agent-mcp` | MCP server over stdio |
-| `agent-nudge` | prompt-time hook: has someone already worked on this? |
-| `agent-eval` | golden-set runner and load generator |
+| Service | Job | Status |
+|---|---|---|
+| [`agent-redact`](https://github.com/baditaflorin/agent-redact) | remove secrets from text and JSON | v0.1.0 |
+| `agent-transcripts` | read Claude, Codex, Gemini, Grok and audit-log files into envelopes | in progress |
+| `agent-store` | ingest and query API over Postgres with pgvector | in progress |
+| `agent-tail` | collector: watch, spool, ship | planned |
+| `agent-embed` | embedding worker | planned |
+| `agent-find` | query CLI | planned |
+| `agent-mcp` | MCP server over stdio | planned |
+| `agent-nudge` | prompt-time hook: has someone already worked on this? | planned |
+| `agent-eval` | golden-set runner and load generator | planned |
 
 ## Using the envelope
 

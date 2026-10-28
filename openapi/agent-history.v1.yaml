@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: |
     The one HTTP API of `agent-store`. Collectors, pushers, the embedder, the CLI, the MCP server,
-    the nudge hook, the eval runner and the hub all speak this and nothing else; only the store
+    the nudge hook, the eval runner and any dashboard all speak this and nothing else; only the store
     touches the database.
 
     Auth is a bearer token. Each laptop has its own **write** token (so one can be revoked alone);

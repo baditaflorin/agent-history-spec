@@ -1,22 +1,22 @@
-# 0005. The hub reaches the store through a server-side proxy
+# 0005. Dashboards reach the store through a server-side proxy
 
 Status: accepted, 2026-10-28
 
 ## Context
 
-`hub.scrapetheworld.org` is a private dashboard with its own login, a keystore for read-only agent
-keys, and a Content-Security-Policy of `connect-src 'self'`. The store must not be exposed to browsers
-and must not learn about the hub.
+A web dashboard that wants to show history has its own login and, usually, a strict Content-Security-Policy
+such as `connect-src 'self'`. The store holds every prompt and tool call of every agent, so it must not be
+exposed to browsers, and it must not need to know about any particular dashboard.
 
 ## Decision
 
-The hub holds one read token for the store in its server configuration and exposes `/api/history/*`
-that forwards `search`, `sessions`, `sessions/{key}/events` and `graph` after its own authentication.
-The browser only calls the hub's origin. History is also published in the hub's agent contract, so
-agents that already reach the hub through the MCP gateway can query history without `agent-mcp`.
-The code lives in the private hub repository; this repository only fixes the API it calls.
+The dashboard keeps one read token for the store in its server configuration and exposes its own
+`/api/history/*` routes that forward `search`, `sessions`, `sessions/{key}/events` and `graph` after the
+dashboard's own authentication. The browser only ever calls the dashboard's origin. A dashboard that already
+publishes tools to agents can publish history the same way, so agents that reach it need no `agent-mcp`.
+This repository only fixes the API such a proxy calls; the dashboard code lives with the dashboard.
 
 ## Consequences
 
-The hub is one more client of the OpenAPI file and needs no special endpoint. Revoking the hub means
-revoking one read token.
+A dashboard is one more client of the OpenAPI file and needs no special endpoint. Revoking it means revoking
+one read token.

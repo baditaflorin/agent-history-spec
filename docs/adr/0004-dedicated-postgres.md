@@ -1,19 +1,19 @@
-# 0004. The store ships its own Postgres with pgvector
+# 0004. The store runs on its own Postgres with pgvector
 
 Status: accepted, 2026-10-28
 
 ## Context
 
-The fleet already has a Postgres 17 host. It is a shared 4-core machine without pgvector. The store needs
-`pg_trgm` and `vector`, large GIN and HNSW indexes, and monthly partitions, and it will be open sourced.
+The store needs the `pg_trgm` and `vector` extensions, large GIN and HNSW indexes, and monthly partitions.
+A Postgres you already run is often shared with other workloads and may not offer pgvector at all, and
+heavy index builds on it would be felt by everything else that uses it.
 
 ## Decision
 
-`agent-store` documents and ships a compose file with `pgvector/pgvector:pg17` and its own volume. The
-reference deployment runs it on a fleet Docker host, not on the shared Postgres. Backups are a nightly
-dump through the same role that provisions it. Extensions are never installed on shared database hosts for this.
+`agent-store` documents and ships a compose file with the `pgvector/pgvector:pg17` image and its own
+volume. Backups are a nightly dump. Extensions are not installed into a shared database for this.
 
 ## Consequences
 
-One more database to run and back up. Nothing else in the fleet can be hurt by the indexes, and anyone
-can reproduce the setup with one `docker compose up`.
+One more database to run and back up. Nothing else can be hurt by the indexes, and anyone can reproduce
+the setup with one `docker compose up`.

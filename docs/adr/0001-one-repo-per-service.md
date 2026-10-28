@@ -18,7 +18,6 @@ rest.
 - `envelope` is the only shared code, because event-id derivation must be identical everywhere. No other
   library is shared; two small copies beat a dependency between services.
 - Services talk HTTP against `openapi/agent-history.v1.yaml`. Only `agent-store` reads or writes the database.
-- Repositories are private until the owner says publish.
 
 ## Consequences
 

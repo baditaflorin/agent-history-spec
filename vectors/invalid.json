@@ -4,9 +4,9 @@
     "field": "event_id",
     "event": {
       "ts": "2026-10-20T14:03:11Z",
-      "host": "mac14",
+      "host": "laptop1",
       "agent": "claude",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "role": "user"
     }
   },
@@ -15,9 +15,9 @@
     "field": "ts",
     "event": {
       "event_id": "e1",
-      "host": "mac14",
+      "host": "laptop1",
       "agent": "claude",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "role": "user"
     }
   },
@@ -29,7 +29,7 @@
       "ts": "2026-10-20T14:03:11Z",
       "host": "mac:14",
       "agent": "claude",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "role": "user"
     }
   },
@@ -41,7 +41,7 @@
       "ts": "2026-10-20T14:03:11Z",
       "host": "mac 14",
       "agent": "claude",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "role": "user"
     }
   },
@@ -51,9 +51,9 @@
     "event": {
       "event_id": "e1",
       "ts": "2026-10-20T14:03:11Z",
-      "host": "mac14",
+      "host": "laptop1",
       "agent": "Claude",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "role": "user"
     }
   },
@@ -63,9 +63,9 @@
     "event": {
       "event_id": "e1",
       "ts": "2026-10-20T14:03:11Z",
-      "host": "mac14",
+      "host": "laptop1",
       "agent": "3claude",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "role": "user"
     }
   },
@@ -75,9 +75,9 @@
     "event": {
       "event_id": "e1",
       "ts": "2026-10-20T14:03:11Z",
-      "host": "mac14",
+      "host": "laptop1",
       "agent": "claude",
-      "session_key": "codex:mac14:abc",
+      "session_key": "codex:laptop1:abc",
       "role": "user"
     }
   },
@@ -87,9 +87,9 @@
     "event": {
       "event_id": "e1",
       "ts": "2026-10-20T14:03:11Z",
-      "host": "mac14",
+      "host": "laptop1",
       "agent": "claude",
-      "session_key": "claude:mac14:",
+      "session_key": "claude:laptop1:",
       "role": "user"
     }
   },
@@ -99,9 +99,9 @@
     "event": {
       "event_id": "e1",
       "ts": "2026-10-20T14:03:11Z",
-      "host": "mac14",
+      "host": "laptop1",
       "agent": "claude",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "role": "user",
       "native_session_id": "other"
     }
@@ -112,9 +112,9 @@
     "event": {
       "event_id": "e1",
       "ts": "2026-10-20T14:03:11Z",
-      "host": "mac14",
+      "host": "laptop1",
       "agent": "claude",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "role": "system"
     }
   },
@@ -124,9 +124,9 @@
     "event": {
       "event_id": "e1",
       "ts": "2026-10-20T14:03:11Z",
-      "host": "mac14",
+      "host": "laptop1",
       "agent": "claude",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "role": "user",
       "edges": [
         {
@@ -142,9 +142,9 @@
     "event": {
       "event_id": "e1",
       "ts": "2026-10-20T14:03:11Z",
-      "host": "mac14",
+      "host": "laptop1",
       "agent": "claude",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "role": "user",
       "edges": [
         {
@@ -160,14 +160,14 @@
     "event": {
       "event_id": "e1",
       "ts": "2026-10-20T14:03:11Z",
-      "host": "mac14",
+      "host": "laptop1",
       "agent": "claude",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "role": "user",
       "edges": [
         {
           "rel": "similar",
-          "dst": "session:codex:imac:x",
+          "dst": "session:codex:laptop2:x",
           "weight": -1
         }
       ]
@@ -179,9 +179,9 @@
     "event": {
       "event_id": "e1",
       "ts": "2026-10-20T14:03:11Z",
-      "host": "mac14",
+      "host": "laptop1",
       "agent": "claude",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "role": "user",
       "edges": [
         {

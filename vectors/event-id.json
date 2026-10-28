@@ -3,45 +3,45 @@
   "hash": [
     {
       "name": "hash of a shell command",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "line": 42,
       "content": "docker compose down",
-      "want": "sha256:7a31775c46dd02be30502054537c28061343daab785eb3c10e534eb9f5b99700"
+      "want": "sha256:d702440b97261ade148eec9ee3b1377d0832b0a56394cfb0cb6a7ab124823c0f"
     },
     {
       "name": "same content, next line gives another id",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "line": 43,
       "content": "docker compose down",
-      "want": "sha256:16b9b355a42c2a531c937dfa0a942fa48f05bd9d72c23e3083aacdd61b522b98"
+      "want": "sha256:bd3c7e557d038c47e59845adc98e382b5fe192cf14edafe398258dea9722cb07"
     },
     {
       "name": "empty content is hashed too",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "line": 1,
       "content": "",
-      "want": "sha256:932cce16ebd5ef9e4e38e2bbffcd8539bb71cfb369367e86b65a5a806643b2a2"
+      "want": "sha256:4ba9e3c5a831b5748917442b9159088b4213b9f28f7b5b279a2c93b72d79ba1c"
     },
     {
       "name": "non-ASCII content is hashed as UTF-8",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "line": 7,
       "content": "pâine și sare\n",
-      "want": "sha256:050291743e7c77a1017579745b1f892031b419c03be45a868108e9d8c6a4a80c"
+      "want": "sha256:a39250b2266af6e44a43e286b5e1c9c3cee963dfd956ab9b8fb4cfccff0fa6bb"
     },
     {
       "name": "another session, same line and content",
-      "session_key": "codex:mac14:01a174e7-9c4f-76b1-8a3d-1ffeb0eb0161",
+      "session_key": "codex:laptop1:01a174e7-9c4f-76b1-8a3d-1ffeb0eb0161",
       "line": 42,
       "content": "docker compose down",
-      "want": "sha256:7697c309900a810f774d688b0cf995131a5402a29e3df1941b6fdd4f63ec1527"
+      "want": "sha256:31dd3337b25e178c03a87905931a45c99cac8708788ee697fbcb7f2acee42e93"
     }
   ],
   "native": [
     {
       "name": "a native id is used as is",
       "native": "toolu_01A09q90qw90lq917835lq9",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "line": 5,
       "content": "x",
       "want": "toolu_01A09q90qw90lq917835lq9"
@@ -49,17 +49,17 @@
     {
       "name": "an empty native id falls back to the hash",
       "native": "",
-      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
       "line": 42,
       "content": "docker compose down",
-      "want": "sha256:7a31775c46dd02be30502054537c28061343daab785eb3c10e534eb9f5b99700"
+      "want": "sha256:d702440b97261ade148eec9ee3b1377d0832b0a56394cfb0cb6a7ab124823c0f"
     }
   ],
   "scoped": [
     {
-      "session_key": "codex:mac14:01a174e7",
+      "session_key": "codex:laptop1:01a174e7",
       "native": "call_abc",
-      "want": "codex:mac14:01a174e7#call_abc"
+      "want": "codex:laptop1:01a174e7#call_abc"
     }
   ]
 }

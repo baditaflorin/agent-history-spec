@@ -170,8 +170,8 @@ func TestInvalidVectors(t *testing.T) {
 
 func baseEvent() envelope.Event {
 	return envelope.Event{
-		EventID: "e1", TS: time.Date(2026, 10, 20, 14, 0, 0, 0, time.UTC), Host: "mac14", Agent: "claude",
-		SessionKey: "claude:mac14:abc", Role: envelope.RoleUser,
+		EventID: "e1", TS: time.Date(2026, 10, 20, 14, 0, 0, 0, time.UTC), Host: "laptop1", Agent: "claude",
+		SessionKey: "claude:laptop1:abc", Role: envelope.RoleUser,
 	}
 }
 
@@ -208,7 +208,7 @@ func TestLimits(t *testing.T) {
 	for _, ok := range []func(*envelope.Event){
 		func(e *envelope.Event) { e.Content = strings.Repeat("a", envelope.MaxContentBytes) },
 		func(e *envelope.Event) { e.Edges = make([]envelope.Edge, 0, envelope.MaxEdges) },
-		func(e *envelope.Event) { e.SessionKey = "claude:mac14:a:b:c" }, // native ids may contain ':'
+		func(e *envelope.Event) { e.SessionKey = "claude:laptop1:a:b:c" }, // native ids may contain ':'
 	} {
 		e := baseEvent()
 		ok(&e)

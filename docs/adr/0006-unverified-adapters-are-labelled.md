@@ -4,9 +4,8 @@ Status: accepted, 2026-10-28
 
 ## Context
 
-Claude Code and Codex transcripts exist on the owner's machines and are used as golden files. No
-Gemini CLI, Antigravity CLI or Grok CLI data was found on any of the four machines when this was
-decided. An adapter written from documentation alone can drop fields silently when a real file differs.
+Claude Code and Codex transcripts were available to the author and are used as golden files. No
+Gemini CLI, Antigravity CLI or Grok CLI data was available when this was decided. An adapter written from documentation alone can drop fields silently when a real file differs.
 
 ## Decision
 

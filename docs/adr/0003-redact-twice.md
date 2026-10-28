@@ -6,7 +6,7 @@ Status: accepted, 2026-10-28
 
 The store holds every secret an agent has ever seen. Redaction at the collector is right, because
 a secret should never leave the laptop. But one buggy or outdated collector, or a pusher that was never
-given a redactor (feed guard, the bus bridge), would put a key into the shared store.
+given a redactor (an audit-log shipper, a message-bus bridge), would put a key into the shared store.
 
 ## Decision
 
