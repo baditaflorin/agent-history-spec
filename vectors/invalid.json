@@ -1,0 +1,198 @@
+[
+  {
+    "name": "missing event_id",
+    "field": "event_id",
+    "event": {
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "mac14",
+      "agent": "claude",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "role": "user"
+    }
+  },
+  {
+    "name": "missing ts",
+    "field": "ts",
+    "event": {
+      "event_id": "e1",
+      "host": "mac14",
+      "agent": "claude",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "role": "user"
+    }
+  },
+  {
+    "name": "host with a colon",
+    "field": "host",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "mac:14",
+      "agent": "claude",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "role": "user"
+    }
+  },
+  {
+    "name": "host with a space",
+    "field": "host",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "mac 14",
+      "agent": "claude",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "role": "user"
+    }
+  },
+  {
+    "name": "agent in upper case",
+    "field": "agent",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "mac14",
+      "agent": "Claude",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "role": "user"
+    }
+  },
+  {
+    "name": "agent that starts with a digit",
+    "field": "agent",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "mac14",
+      "agent": "3claude",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "role": "user"
+    }
+  },
+  {
+    "name": "session_key of another agent",
+    "field": "session_key",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "mac14",
+      "agent": "claude",
+      "session_key": "codex:mac14:abc",
+      "role": "user"
+    }
+  },
+  {
+    "name": "session_key without a native id",
+    "field": "session_key",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "mac14",
+      "agent": "claude",
+      "session_key": "claude:mac14:",
+      "role": "user"
+    }
+  },
+  {
+    "name": "native_session_id that disagrees with the key",
+    "field": "session_key",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "mac14",
+      "agent": "claude",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "role": "user",
+      "native_session_id": "other"
+    }
+  },
+  {
+    "name": "unknown role",
+    "field": "role",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "mac14",
+      "agent": "claude",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "role": "system"
+    }
+  },
+  {
+    "name": "unknown relation",
+    "field": "edges[0].rel",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "mac14",
+      "agent": "claude",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "role": "user",
+      "edges": [
+        {
+          "rel": "follows",
+          "dst": "repo:/x"
+        }
+      ]
+    }
+  },
+  {
+    "name": "destination without a node prefix",
+    "field": "edges[0].dst",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "mac14",
+      "agent": "claude",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "role": "user",
+      "edges": [
+        {
+          "rel": "touched",
+          "dst": "/etc/passwd"
+        }
+      ]
+    }
+  },
+  {
+    "name": "negative weight",
+    "field": "edges[0].weight",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "mac14",
+      "agent": "claude",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "role": "user",
+      "edges": [
+        {
+          "rel": "similar",
+          "dst": "session:codex:imac:x",
+          "weight": -1
+        }
+      ]
+    }
+  },
+  {
+    "name": "second edge is the bad one",
+    "field": "edges[1].dst",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "mac14",
+      "agent": "claude",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "role": "user",
+      "edges": [
+        {
+          "rel": "ran_in",
+          "dst": "repo:/x"
+        },
+        {
+          "rel": "touched",
+          "dst": "nope"
+        }
+      ]
+    }
+  }
+]

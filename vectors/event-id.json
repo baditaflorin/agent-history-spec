@@ -1,0 +1,65 @@
+{
+  "description": "event id derivation: native id when the adapter has one, else sha256(session_key NUL line NUL content), prefixed 'sha256:'",
+  "hash": [
+    {
+      "name": "hash of a shell command",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "line": 42,
+      "content": "docker compose down",
+      "want": "sha256:7a31775c46dd02be30502054537c28061343daab785eb3c10e534eb9f5b99700"
+    },
+    {
+      "name": "same content, next line gives another id",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "line": 43,
+      "content": "docker compose down",
+      "want": "sha256:16b9b355a42c2a531c937dfa0a942fa48f05bd9d72c23e3083aacdd61b522b98"
+    },
+    {
+      "name": "empty content is hashed too",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "line": 1,
+      "content": "",
+      "want": "sha256:932cce16ebd5ef9e4e38e2bbffcd8539bb71cfb369367e86b65a5a806643b2a2"
+    },
+    {
+      "name": "non-ASCII content is hashed as UTF-8",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "line": 7,
+      "content": "pâine și sare\n",
+      "want": "sha256:050291743e7c77a1017579745b1f892031b419c03be45a868108e9d8c6a4a80c"
+    },
+    {
+      "name": "another session, same line and content",
+      "session_key": "codex:mac14:01a174e7-9c4f-76b1-8a3d-1ffeb0eb0161",
+      "line": 42,
+      "content": "docker compose down",
+      "want": "sha256:7697c309900a810f774d688b0cf995131a5402a29e3df1941b6fdd4f63ec1527"
+    }
+  ],
+  "native": [
+    {
+      "name": "a native id is used as is",
+      "native": "toolu_01A09q90qw90lq917835lq9",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "line": 5,
+      "content": "x",
+      "want": "toolu_01A09q90qw90lq917835lq9"
+    },
+    {
+      "name": "an empty native id falls back to the hash",
+      "native": "",
+      "session_key": "claude:mac14:11111111-2222-3333-4444-555555555555",
+      "line": 42,
+      "content": "docker compose down",
+      "want": "sha256:7a31775c46dd02be30502054537c28061343daab785eb3c10e534eb9f5b99700"
+    }
+  ],
+  "scoped": [
+    {
+      "session_key": "codex:mac14:01a174e7",
+      "native": "call_abc",
+      "want": "codex:mac14:01a174e7#call_abc"
+    }
+  ]
+}

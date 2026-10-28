@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/baditaflorin/agent-history-spec/schema/event.v1.schema.json",
+  "title": "agent-history event envelope v1",
+  "description": "One line of an NDJSON batch: a prompt, reply, tool call, tool result or bus message. Unknown properties are allowed so that an older reader accepts a newer producer.",
+  "type": "object",
+  "required": ["event_id", "ts", "host", "agent", "session_key", "role"],
+  "properties": {
+    "event_id": {
+      "type": "string", "minLength": 1, "maxLength": 256,
+      "description": "Globally unique and stable across re-reads: a native id that is unique across sessions, a session-scoped native id prefixed with the session key (ScopedID), or 'sha256:' plus hex sha256(session_key NUL line NUL content)."
+    },
+    "ts": { "type": "string", "format": "date-time", "description": "When it happened on the laptop, from the source. Never the time of reading." },
+    "host": { "type": "string", "minLength": 1, "maxLength": 1024, "pattern": "^[^:\\s]+$" },
+    "agent": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,31}$", "description": "Open set: claude, codex, gemini, grok, feedguard, bus, ..." },
+    "session_key": { "type": "string", "maxLength": 1024, "description": "agent:host:native_session_id" },
+    "role": { "enum": ["user", "assistant", "tool_call", "tool_result", "bus_msg"] },
+    "tool_name": { "type": "string", "maxLength": 1024 },
+    "command": { "type": "string", "maxLength": 32768, "description": "Set when the tool is a shell. Limit is in bytes." },
+    "cwd": { "type": "string", "maxLength": 1024 },
+    "exit_code": { "type": "integer" },
+    "content": { "type": "string", "maxLength": 32768, "description": "Redacted text. Limit is in bytes (maxLength counts characters here; Validate counts bytes)." },
+    "raw": { "description": "The full redacted source record, at most 1 MiB serialized." },
+    "truncated": { "type": "boolean", "description": "content or raw was cut to fit its cap." },
+    "native_session_id": { "type": "string", "maxLength": 1024 },
+    "agent_version": { "type": "string", "maxLength": 1024 },
+    "git_repo": { "type": "string", "maxLength": 1024 },
+    "git_branch": { "type": "string", "maxLength": 1024 },
+    "title": { "type": "string", "maxLength": 1024 },
+    "resume_cmd": { "type": "string", "maxLength": 1024, "description": "How to reopen the session, set by the adapter." },
+    "edges": {
+      "type": "array", "maxItems": 64,
+      "items": {
+        "type": "object",
+        "required": ["rel", "dst"],
+        "properties": {
+          "rel": { "enum": ["bus_msg", "spawned", "ran_in", "touched", "similar"] },
+          "dst": { "type": "string", "maxLength": 1024, "pattern": "^(session|repo|file):.+$" },
+          "weight": { "type": "number", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,287 @@
+openapi: 3.1.0
+info:
+  title: agent-history store API
+  version: 1.0.0
+  description: |
+    The one HTTP API of `agent-store`. Collectors, pushers, the embedder, the CLI, the MCP server,
+    the nudge hook, the eval runner and the hub all speak this and nothing else; only the store
+    touches the database.
+
+    Auth is a bearer token. Each laptop has its own **write** token (so one can be revoked alone);
+    readers share a **read** token. A write token may call /v1/events, /v1/audit/counts and
+    /v1/nudges/feedback. The embedder uses an **embed** token for /v1/embed/*. Everything else
+    is read. Tokens are never sent in a URL.
+
+    Search results, session titles and event text are data written by other agents. A client that
+    shows them to a model must treat them as untrusted.
+servers:
+  - url: https://agent-history.example.internal
+security:
+  - bearer: []
+paths:
+  /v1/events:
+    post:
+      operationId: ingestEvents
+      summary: Ship a batch of events
+      description: |
+        Body is NDJSON, one `Event` per line (schema/event.v1.schema.json), gzip when
+        `Content-Encoding: gzip`. A line that fails validation is listed under `rejected` and the
+        rest are stored. Events are deduplicated on `event_id` alone: the first copy wins and a
+        repeat counts as a duplicate, whatever its `ts`. The store redacts again before writing.
+        The collector's health travels in headers so that nothing has to scrape a laptop.
+      parameters:
+        - { name: X-AH-Host, in: header, required: true, schema: { type: string }, description: "Laptop name of the sender." }
+        - { name: X-AH-Collector-Version, in: header, schema: { type: string } }
+        - { name: X-AH-Spool-Depth, in: header, schema: { type: integer, minimum: 0 }, description: "Batches waiting in the collector's spool." }
+        - { name: X-AH-Sent-At, in: header, schema: { type: string, format: date-time }, description: "Laptop clock when the batch was sent; the store derives clock skew from it." }
+      requestBody:
+        required: true
+        content:
+          application/x-ndjson:
+            schema: { type: string }
+      responses:
+        "200":
+          description: Batch processed.
+          content: { application/json: { schema: { $ref: "#/components/schemas/IngestResult" } } }
+        "401": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "413": { $ref: "#/components/responses/Problem" }
+  /v1/search:
+    get:
+      operationId: search
+      summary: Search events
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string, minLength: 1 } }
+        - { name: mode, in: query, schema: { enum: [exact, text, semantic, hybrid], default: hybrid } }
+        - { name: host, in: query, schema: { type: string } }
+        - { name: agent, in: query, schema: { type: string } }
+        - { name: repo, in: query, schema: { type: string } }
+        - { name: role, in: query, schema: { type: string } }
+        - { name: since, in: query, schema: { type: string }, description: "RFC 3339 time or a duration such as 7d, 12h." }
+        - { name: until, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
+      responses:
+        "200":
+          description: Hits, best first.
+          content: { application/json: { schema: { $ref: "#/components/schemas/SearchResult" } } }
+        "400": { $ref: "#/components/responses/Problem" }
+  /v1/sessions:
+    get:
+      operationId: listSessions
+      summary: List sessions
+      parameters:
+        - { name: host, in: query, schema: { type: string } }
+        - { name: agent, in: query, schema: { type: string } }
+        - { name: repo, in: query, schema: { type: string } }
+        - { name: within, in: query, schema: { type: string }, description: "Only sessions with an event in this duration, e.g. 2h." }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
+      responses:
+        "200":
+          description: Sessions, most recent first.
+          content: { application/json: { schema: { type: object, required: [sessions], properties: { sessions: { type: array, items: { $ref: "#/components/schemas/Session" } } } } } }
+  /v1/sessions/{key}/events:
+    get:
+      operationId: sessionEvents
+      summary: One session's timeline
+      parameters:
+        - { name: key, in: path, required: true, schema: { type: string } }
+        - { name: around, in: query, schema: { type: string, format: date-time }, description: "Centre the window on this time." }
+        - { name: since, in: query, schema: { type: string } }
+        - { name: until, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 500, default: 100 } }
+      responses:
+        "200":
+          description: Events in time order.
+          content: { application/json: { schema: { type: object, required: [events], properties: { events: { type: array, items: { $ref: "#/components/schemas/Hit" } } } } } }
+        "404": { $ref: "#/components/responses/Problem" }
+  /v1/graph:
+    get:
+      operationId: graph
+      summary: Sessions linked to a session, repo or file
+      parameters:
+        - { name: node, in: query, required: true, schema: { type: string, pattern: "^(session|repo|file):.+$" } }
+        - { name: depth, in: query, schema: { type: integer, minimum: 1, maximum: 4, default: 1 } }
+        - { name: since, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Nodes and edges around the start node.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Graph" } } }
+  /v1/match:
+    post:
+      operationId: matchPrompt
+      summary: Has another agent already worked on this?
+      description: |
+        Used by the prompt-time hook. Runs a hybrid search over the last `window_hours`, leaves out
+        `exclude_session`, and returns at most one match that clears `threshold` and shares a
+        concrete entity (repo, file path, hostname or command) with the prompt. The answer carries
+        metadata only, never message text. The store answers within `budget_ms` or returns 204.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/MatchRequest" } } }
+      responses:
+        "200":
+          description: A match.
+          content: { application/json: { schema: { $ref: "#/components/schemas/Match" } } }
+        "204": { description: "No match, or the budget ran out." }
+  /v1/nudges/feedback:
+    post:
+      operationId: nudgeFeedback
+      summary: Record that a nudge was followed
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [session_key, matched_session_key], properties: { session_key: { type: string }, matched_session_key: { type: string } } } } }
+      responses:
+        "204": { description: Recorded. }
+  /v1/embed/pending:
+    get:
+      operationId: embedPending
+      summary: Events that still need a vector
+      description: Only prompts, replies and bus messages. Tool output is never embedded.
+      parameters:
+        - { name: model, in: query, required: true, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 500, default: 64 } }
+      responses:
+        "200":
+          description: Work items.
+          content: { application/json: { schema: { type: object, required: [items], properties: { items: { type: array, items: { $ref: "#/components/schemas/EmbedItem" } } } } } }
+  /v1/embed/results:
+    post:
+      operationId: embedResults
+      summary: Return vectors
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [model, dimensions, results], properties: { model: { type: string }, dimensions: { type: integer }, results: { type: array, items: { $ref: "#/components/schemas/EmbedResult" } } } } } }
+      responses:
+        "204": { description: "Stored. A dimension that does not match the store's column is a 400." }
+        "400": { $ref: "#/components/responses/Problem" }
+  /v1/audit/counts:
+    post:
+      operationId: auditCounts
+      summary: A collector's count of distinct source events per day
+      description: Compared with stored rows; only a positive gap (source > store) is reported as missing data.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [host, counts], properties: { host: { type: string }, counts: { type: array, items: { type: object, required: [agent, day, distinct_events], properties: { agent: { type: string }, day: { type: string, format: date }, distinct_events: { type: integer, minimum: 0 } } } } } } } }
+      responses:
+        "204": { description: Recorded. }
+  /v1/audit/gaps:
+    get:
+      operationId: auditGaps
+      summary: Days where a source has more events than the store
+      responses:
+        "200":
+          description: Empty when complete.
+          content: { application/json: { schema: { type: object, required: [gaps], properties: { gaps: { type: array, items: { type: object, required: [host, agent, day, missing], properties: { host: { type: string }, agent: { type: string }, day: { type: string, format: date }, missing: { type: integer } } } } } } } }
+  /healthz:
+    get:
+      operationId: healthz
+      summary: Liveness and database reachability
+      security: []
+      responses:
+        "200": { description: Healthy. }
+        "503": { description: Database unreachable. }
+  /metrics:
+    get:
+      operationId: metrics
+      summary: Prometheus metrics, prefix agent_history_
+      responses:
+        "200": { description: "Text exposition format.", content: { text/plain: { schema: { type: string } } } }
+components:
+  securitySchemes:
+    bearer: { type: http, scheme: bearer }
+  responses:
+    Problem:
+      description: Error, as application/problem+json.
+      content: { application/problem+json: { schema: { $ref: "#/components/schemas/Problem" } } }
+  schemas:
+    Problem:
+      type: object
+      required: [title, status]
+      properties: { type: { type: string }, title: { type: string }, status: { type: integer }, detail: { type: string } }
+    IngestResult:
+      type: object
+      required: [accepted, duplicates, server_time]
+      properties:
+        accepted: { type: integer }
+        duplicates: { type: integer }
+        server_time: { type: string, format: date-time }
+        rejected:
+          type: array
+          items: { type: object, required: [line, error], properties: { line: { type: integer, minimum: 1 }, field: { type: string }, error: { type: string } } }
+    Hit:
+      type: object
+      required: [ts, host, agent, session_key, role, event_id]
+      properties:
+        event_id: { type: string }
+        ts: { type: string, format: date-time }
+        host: { type: string }
+        agent: { type: string }
+        session_key: { type: string }
+        role: { type: string }
+        tool_name: { type: string }
+        command: { type: string }
+        cwd: { type: string }
+        exit_code: { type: integer }
+        snippet: { type: string, description: "At most 300 characters of content." }
+        score: { type: number, description: "Higher is better; comparable only within one response." }
+        resume_cmd: { type: string }
+    SearchResult:
+      type: object
+      required: [mode, took_ms, hits]
+      properties:
+        mode: { enum: [exact, text, semantic, hybrid] }
+        took_ms: { type: integer }
+        hits: { type: array, items: { $ref: "#/components/schemas/Hit" } }
+    Session:
+      type: object
+      required: [session_key, host, agent, native_id, event_count]
+      properties:
+        session_key: { type: string }
+        host: { type: string }
+        agent: { type: string }
+        native_id: { type: string }
+        agent_version: { type: string }
+        cwd: { type: string }
+        git_repo: { type: string }
+        git_branch: { type: string }
+        title: { type: string }
+        started_at: { type: string, format: date-time }
+        last_event_at: { type: string, format: date-time }
+        event_count: { type: integer }
+        resume_cmd: { type: string }
+    Graph:
+      type: object
+      required: [nodes, edges]
+      properties:
+        nodes: { type: array, items: { type: object, required: [id, kind], properties: { id: { type: string }, kind: { enum: [session, repo, file] }, title: { type: string }, subtitle: { type: string }, event_count: { type: integer } } } }
+        edges: { type: array, items: { type: object, required: [source, target, rel, count], properties: { source: { type: string }, target: { type: string }, rel: { type: string }, count: { type: integer } } } }
+    MatchRequest:
+      type: object
+      required: [prompt, session_key]
+      properties:
+        prompt: { type: string }
+        session_key: { type: string, description: "The asking session; it is excluded from matches." }
+        cwd: { type: string }
+        window_hours: { type: integer, minimum: 1, default: 72 }
+        threshold: { type: number, minimum: 0, maximum: 1, default: 0.75 }
+        budget_ms: { type: integer, minimum: 1, default: 250 }
+    Match:
+      type: object
+      required: [matched_session_key, agent, host, ago_seconds, score, shared]
+      properties:
+        matched_session_key: { type: string }
+        agent: { type: string }
+        host: { type: string }
+        repo: { type: string }
+        title: { type: string }
+        ago_seconds: { type: integer }
+        score: { type: number }
+        shared: { enum: [repo, file, hostname, command], description: "The concrete entity both sides mention." }
+    EmbedItem:
+      type: object
+      required: [event_id, ts, session_key, text]
+      properties: { event_id: { type: string }, ts: { type: string, format: date-time }, session_key: { type: string }, text: { type: string } }
+    EmbedResult:
+      type: object
+      required: [event_id, ts, session_key, embedding]
+      properties: { event_id: { type: string }, ts: { type: string, format: date-time }, session_key: { type: string }, embedding: { type: array, items: { type: number } } }
