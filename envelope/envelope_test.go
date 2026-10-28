@@ -267,8 +267,12 @@ func TestWriteNDJSONDoesNotEscapeHTML(t *testing.T) {
 	if err := envelope.WriteNDJSON(&buf, []envelope.Event{e}); err != nil {
 		t.Fatal(err)
 	}
-	if strings.Contains(buf.String(), `<`) || strings.Contains(buf.String(), `&`) {
+	bs := string(rune(92)) // a backslash, so that this source never holds a unicode escape sequence
+	if strings.Contains(buf.String(), bs+"u003c") || strings.Contains(buf.String(), bs+"u0026") {
 		t.Fatalf("HTML-escaped output: %s", buf.String())
+	}
+	if !strings.Contains(buf.String(), "<ok>") || !strings.Contains(buf.String(), "&&") {
+		t.Fatalf("expected the characters to be written as they are: %s", buf.String())
 	}
 }
 
