@@ -27,8 +27,9 @@ so an odd value costs the field and never the event. `Validate` refuses a non-em
 is too long.
 
 The API gains `model` and `effort` as filters on `/v1/search` and `/v1/sessions`: exact, case-insensitive, and a
-trailing `*` on `model` matches a prefix. A session matches when at least one of its answers does, so a session that
-changed model matches each of them. Hits carry `model` and `effort`; a session summary carries `models` and
+trailing `*` on `model` matches a prefix (a lone `*` means any reported model). A session matches when at least one of
+its answers does, so a session that changed model matches each of them; given both filters, one answer has to match
+both, so "Sonnet at xhigh" does not match a session that ran Sonnet at medium and Opus at xhigh. Hits carry `model` and `effort`; a session summary carries `models` and
 `efforts`, the sorted distinct values seen. `thinking` is stored but not a filter or an output field in v0.2.0.
 
 ## Consequences
