@@ -194,5 +194,96 @@
         }
       ]
     }
+  },
+  {
+    "name": "model in upper case",
+    "field": "model",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "laptop1",
+      "agent": "claude",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
+      "role": "assistant",
+      "model": "Claude-Sonnet-5-5"
+    }
+  },
+  {
+    "name": "model with a space",
+    "field": "model",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "laptop1",
+      "agent": "claude",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
+      "role": "assistant",
+      "model": "claude sonnet"
+    }
+  },
+  {
+    "name": "model that is the synthetic placeholder",
+    "field": "model",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "laptop1",
+      "agent": "claude",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
+      "role": "assistant",
+      "model": "<synthetic>"
+    }
+  },
+  {
+    "name": "model longer than 128 bytes",
+    "field": "model",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "laptop1",
+      "agent": "claude",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
+      "role": "assistant",
+      "model": "maaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "effort in upper case",
+    "field": "effort",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "laptop1",
+      "agent": "claude",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
+      "role": "assistant",
+      "effort": "XHigh"
+    }
+  },
+  {
+    "name": "effort with a space",
+    "field": "effort",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "laptop1",
+      "agent": "claude",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
+      "role": "assistant",
+      "effort": "extra high"
+    }
+  },
+  {
+    "name": "effort longer than 32 bytes",
+    "field": "effort",
+    "event": {
+      "event_id": "e1",
+      "ts": "2026-10-20T14:03:11Z",
+      "host": "laptop1",
+      "agent": "claude",
+      "session_key": "claude:laptop1:11111111-2222-3333-4444-555555555555",
+      "role": "assistant",
+      "effort": "eaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
   }
 ]

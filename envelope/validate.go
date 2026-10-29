@@ -92,6 +92,12 @@ func Validate(e *Event) error {
 			return err
 		}
 	}
+	if e.Model != "" && !modelPattern.MatchString(e.Model) {
+		return bad("model", "must be a lower-case id of at most 128 bytes (%s)", modelPattern)
+	}
+	if e.Effort != "" && !effortPattern.MatchString(e.Effort) {
+		return bad("effort", "must be a lower-case word of at most 32 bytes (%s)", effortPattern)
+	}
 	for _, f := range []struct{ name, v string }{{"command", e.Command}, {"content", e.Content}} {
 		if len(f.v) > MaxContentBytes {
 			return bad(f.name, "%d bytes, limit %d", len(f.v), MaxContentBytes)

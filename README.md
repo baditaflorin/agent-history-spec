@@ -56,6 +56,8 @@ Rules that matter:
 - Content over 32 KiB or raw over 1 MiB is cut by the producer (`truncated: true`); the store refuses
   a larger event instead of cutting it.
 - Unknown fields are ignored, so a newer producer does not break an older store.
+- `model`, `effort` and `thinking` are optional, set on the events of an assistant turn and left empty when the
+  tool does not say; use `envelope.CleanModel` and `CleanEffort` on whatever the tool wrote (ADR 0007).
 
 ## Tests
 
@@ -67,5 +69,6 @@ The vectors are the specification. A change to `envelope/` that changes a vector
 
 ## Status
 
-Pre-1.0. The envelope and API are `v1` but may change until the first services are released.
+Pre-1.0. The envelope and API are `v1` but may change until the first services are released. v0.2.0 added the
+optional `model`, `effort` and `thinking` fields and the matching filters (backward compatible).
 Licensed under Apache-2.0.

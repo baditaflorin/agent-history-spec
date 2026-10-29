@@ -58,6 +58,18 @@ type Event struct {
 	// Truncated says Content or Raw was cut to fit its cap.
 	Truncated bool `json:"truncated,omitempty"`
 
+	// Model is the model that produced this event, as the tool reports it, lower-case:
+	// "claude-sonnet-5-5", "gpt-5.6-terra". Producers set it on events of an assistant turn
+	// (assistant text, tool calls) and leave it empty everywhere else and whenever the tool does
+	// not say. It is never guessed.
+	Model string `json:"model,omitempty"`
+	// Effort is the thinking or reasoning level the tool reports for that turn, lower-case:
+	// low, medium, high, xhigh, max, ... Same rules as Model.
+	Effort string `json:"effort,omitempty"`
+	// Thinking is true when the assistant turn contained a thinking or reasoning block. It is
+	// only ever sent as true: absent means "not reported", not "did not think".
+	Thinking bool `json:"thinking,omitempty"`
+
 	// Session facts. The store keeps the latest non-empty value of each per session.
 	NativeSessionID string `json:"native_session_id,omitempty"`
 	AgentVersion    string `json:"agent_version,omitempty"`

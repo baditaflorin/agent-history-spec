@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"reflect"
+	"regexp"
 	"sort"
 	"strings"
 	"testing"
@@ -87,8 +88,8 @@ func readValid(t *testing.T) []envelope.Event {
 
 func TestValidVectors(t *testing.T) {
 	events := readValid(t)
-	if len(events) != 7 {
-		t.Fatalf("got %d events, want 7", len(events))
+	if len(events) != 9 {
+		t.Fatalf("got %d events, want 9", len(events))
 	}
 	seen := map[string]bool{}
 	for i := range events {
@@ -103,6 +104,13 @@ func TestValidVectors(t *testing.T) {
 	// exit code 0 must survive as "present", not vanish as a zero value
 	if events[2].ExitCode == nil || *events[2].ExitCode != 0 {
 		t.Errorf("exit_code 0 was lost: %v", events[2].ExitCode)
+	}
+	// the answering model, the effort and the thinking flag survive
+	if a := events[7]; a.Model != "claude-sonnet-5-5" || a.Effort != "xhigh" || !a.Thinking {
+		t.Errorf("assistant vector lost model, effort or thinking: %q %q %v", a.Model, a.Effort, a.Thinking)
+	}
+	if c := events[8]; c.Model != "gpt-5.6-terra" || c.Effort != "high" || c.Thinking {
+		t.Errorf("codex vector: %q %q %v", c.Model, c.Effort, c.Thinking)
 	}
 	// an offset timestamp keeps its instant
 	if want := time.Date(2026, 10, 21, 6, 15, 0, 500_000_000, time.UTC); !events[3].TS.Equal(want) {
@@ -318,6 +326,86 @@ func TestSchemaMatchesStruct(t *testing.T) {
 		_ = json.Unmarshal(b, &e2)
 		if envelope.Validate(&e2) == nil {
 			t.Errorf("Validate accepted an event without %s", drop)
+		}
+	}
+}
+
+func TestCleanModelAndEffort(t *testing.T) {
+	models := []struct{ in, want string }{
+		{"claude-sonnet-5-5", "claude-sonnet-5-5"},
+		{"  Claude-Opus-5-5 ", "claude-opus-5-5"},
+		{"gpt-5.6-terra", "gpt-5.6-terra"},
+		{"claude-opus-5-5[1m]", "claude-opus-5-5[1m]"},
+		{"llama3:8b", "llama3:8b"},
+		{"vendor/name@v1+x", "vendor/name@v1+x"},
+		{"<synthetic>", ""},
+		{"", ""},
+		{"   ", ""},
+		{"two words", ""},
+		{"-leading-dash", ""},
+		{"tab\there", ""},
+		{strings.Repeat("a", 128), strings.Repeat("a", 128)},
+		{strings.Repeat("a", 129), ""},
+	}
+	for _, c := range models {
+		if got := envelope.CleanModel(c.in); got != c.want {
+			t.Errorf("CleanModel(%q) = %q, want %q", c.in, got, c.want)
+		}
+		if got := envelope.CleanModel(envelope.CleanModel(c.in)); got != envelope.CleanModel(c.in) {
+			t.Errorf("CleanModel is not idempotent on %q", c.in)
+		}
+	}
+	efforts := []struct{ in, want string }{
+		{"xhigh", "xhigh"}, {" High ", "high"}, {"MAX", "max"}, {"minimal", "minimal"},
+		{"", ""}, {"extra high", ""}, {"<none>", ""}, {strings.Repeat("a", 32), strings.Repeat("a", 32)},
+		{strings.Repeat("a", 33), ""},
+	}
+	for _, c := range efforts {
+		if got := envelope.CleanEffort(c.in); got != c.want {
+			t.Errorf("CleanEffort(%q) = %q, want %q", c.in, got, c.want)
+		}
+	}
+	// whatever the Clean functions return, Validate accepts
+	for _, c := range models {
+		e := baseEvent()
+		e.Model = envelope.CleanModel(c.in)
+		e.Effort = envelope.CleanEffort(c.in)
+		if err := envelope.Validate(&e); err != nil {
+			t.Errorf("Validate refused a cleaned value of %q: %v", c.in, err)
+		}
+	}
+}
+
+// The patterns in the JSON Schema and the ones Validate uses must accept the same strings.
+func TestSchemaPatternsAgreeWithValidate(t *testing.T) {
+	var s struct {
+		Properties map[string]struct {
+			Pattern string `json:"pattern"`
+		} `json:"properties"`
+	}
+	if err := json.Unmarshal(readFile(t, "../schema/event.v1.schema.json"), &s); err != nil {
+		t.Fatal(err)
+	}
+	cands := []string{
+		"claude-sonnet-5-5", "Claude", "a b", "a\tb", "<synthetic>", "x[1m]", "a:b/c@d+e", "-a", ".a", "0a",
+		strings.Repeat("a", 32), strings.Repeat("a", 33), strings.Repeat("a", 128), strings.Repeat("a", 129), "é", "a\nb",
+	}
+	for _, field := range []string{"model", "effort"} {
+		re, err := regexp.Compile(s.Properties[field].Pattern)
+		if err != nil {
+			t.Fatalf("%s: schema pattern: %v", field, err)
+		}
+		for _, v := range cands {
+			e := baseEvent()
+			if field == "model" {
+				e.Model = v
+			} else {
+				e.Effort = v
+			}
+			valid := envelope.Validate(&e) == nil
+			if valid != re.MatchString(v) {
+				t.Errorf("%s=%q: Validate accepts %v, schema pattern accepts %v", field, v, valid, re.MatchString(v))
+			}
 		}
 	}
 }
