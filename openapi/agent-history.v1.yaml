@@ -75,8 +75,8 @@ paths:
         - { name: host, in: query, schema: { type: string } }
         - { name: agent, in: query, schema: { type: string } }
         - { name: repo, in: query, schema: { type: string } }
-        - { name: model, in: query, schema: { type: string }, description: "Only sessions in which at least one answer came from this model (lower-case, exact match); a trailing * matches a prefix, for example claude-sonnet*. A session that used several models matches each of them; `models` on the result lists all. Case-insensitive." }
-        - { name: effort, in: query, schema: { type: string }, description: "Only sessions in which at least one answer came at this thinking or reasoning level, exact match, case-insensitive. A session whose level changed matches each level it used." }
+        - { name: model, in: query, schema: { type: string }, description: "Only sessions in which at least one answer came from this model (lower-case, exact match); a trailing * matches a prefix, for example claude-sonnet*. A session that used several models matches each of them; `models` on the result lists all. Case-insensitive. Given together with `effort`, one answer must match both (the same answer used that model at that level)." }
+        - { name: effort, in: query, schema: { type: string }, description: "Only sessions in which at least one answer came at this thinking or reasoning level, exact match, case-insensitive. A session whose level changed matches each level it used. Given together with `model`, one answer must match both." }
         - { name: within, in: query, schema: { type: string }, description: "Only sessions with an event in this duration, e.g. 2h." }
         - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
       responses:
