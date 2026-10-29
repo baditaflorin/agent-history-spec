@@ -57,6 +57,8 @@ paths:
         - { name: agent, in: query, schema: { type: string } }
         - { name: repo, in: query, schema: { type: string } }
         - { name: role, in: query, schema: { type: string } }
+        - { name: model, in: query, schema: { type: string }, description: "Only events answered by this model, as the store holds it (lower-case, exact match); a trailing * matches a prefix, for example claude-sonnet*. Matching is case-insensitive." }
+        - { name: effort, in: query, schema: { type: string }, description: "Only events answered at this thinking or reasoning level (low, medium, high, xhigh, max, ...), exact match, case-insensitive." }
         - { name: since, in: query, schema: { type: string }, description: "RFC 3339 time or a duration such as 7d, 12h." }
         - { name: until, in: query, schema: { type: string } }
         - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
@@ -73,6 +75,8 @@ paths:
         - { name: host, in: query, schema: { type: string } }
         - { name: agent, in: query, schema: { type: string } }
         - { name: repo, in: query, schema: { type: string } }
+        - { name: model, in: query, schema: { type: string }, description: "Only sessions in which at least one answer came from this model (lower-case, exact match); a trailing * matches a prefix, for example claude-sonnet*. A session that used several models matches each of them; `models` on the result lists all. Case-insensitive." }
+        - { name: effort, in: query, schema: { type: string }, description: "Only sessions in which at least one answer came at this thinking or reasoning level, exact match, case-insensitive. A session whose level changed matches each level it used." }
         - { name: within, in: query, schema: { type: string }, description: "Only sessions with an event in this duration, e.g. 2h." }
         - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
       responses:
@@ -225,6 +229,8 @@ components:
         snippet: { type: string, description: "At most 300 characters of content." }
         score: { type: number, description: "Higher is better; comparable only within one response." }
         resume_cmd: { type: string }
+        model: { type: string, description: "The model that produced this event; empty on events that are not an assistant turn and when the tool does not say." }
+        effort: { type: string, description: "The thinking or reasoning level of that turn; same rules as model." }
     SearchResult:
       type: object
       required: [mode, took_ms, hits]
@@ -249,6 +255,8 @@ components:
         last_event_at: { type: string, format: date-time }
         event_count: { type: integer }
         resume_cmd: { type: string }
+        models: { type: array, items: { type: string }, description: "Every distinct model that produced an event of this session, sorted. Empty when the tool does not report it." }
+        efforts: { type: array, items: { type: string }, description: "Every distinct thinking or reasoning level seen in this session, sorted. Empty when the tool does not report it." }
     Graph:
       type: object
       required: [nodes, edges]
