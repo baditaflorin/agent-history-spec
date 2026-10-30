@@ -50,6 +50,9 @@ paths:
     get:
       operationId: search
       summary: Search events
+      description: |
+        With a very common word the text leg may rank only the newest matches, and the answer says so
+        in the `X-AH-Degraded` and `X-AH-Text-Since` response headers.
       parameters:
         - { name: q, in: query, required: true, schema: { type: string, minLength: 1 } }
         - { name: mode, in: query, schema: { enum: [exact, text, semantic, hybrid], default: hybrid } }
@@ -65,6 +68,21 @@ paths:
       responses:
         "200":
           description: Hits, best first.
+          headers:
+            X-AH-Degraded:
+              schema: { type: string }
+              description: |
+                Present when part of the search could not run in full: a comma-separated list of reasons,
+                for example `semantic-unavailable, text-candidates-capped`. Known reasons:
+                `semantic-unavailable`, `semantic-embedder-failed`, `semantic-embedder-timeout`,
+                `semantic-dimension-mismatch` (the semantic leg did not run, the hits come from the text leg)
+                and `text-candidates-capped` (the text leg ranked only the newest matches, see `X-AH-Text-Since`).
+                A client must treat a reason it does not know as opaque; a non-empty value means the answer is partial.
+            X-AH-Text-Since:
+              schema: { type: string, format: date-time }
+              description: |
+                RFC 3339 time, inclusive. Present with `text-candidates-capped`: the text matches before this
+                time were not ranked. Repeat the search with `until` set to this value to page back to older matches.
           content: { application/json: { schema: { $ref: "#/components/schemas/SearchResult" } } }
         "400": { $ref: "#/components/responses/Problem" }
   /v1/sessions:
