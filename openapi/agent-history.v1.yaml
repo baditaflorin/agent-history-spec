@@ -249,6 +249,7 @@ components:
         resume_cmd: { type: string }
         model: { type: string, description: "The model that produced this event; empty on events that are not an assistant turn and when the tool does not say." }
         effort: { type: string, description: "The thinking or reasoning level of that turn; same rules as model." }
+        title: { type: string, description: "The name of the session the event belongs to (the same value as `title` on the Session); empty when the agent gave the session none. Lets a client name a hit without listing sessions." }
     SearchResult:
       type: object
       required: [mode, took_ms, hits]
